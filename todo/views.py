@@ -532,22 +532,29 @@ def _deserialized_cookie_value(cookie_raw_value):
     return None
 
 
-def _default_debug_encryption_key():
+_DEBUG_COOKIE_ENCRYPTION_KEY = Fernet.generate_key().decode('ascii')
+_DEBUG_PROTOBUF_ENCRYPTION_KEY = Fernet.generate_key().decode('ascii')
+
+
+def _default_debug_encryption_key(key):
   if os.environ.get('DJANGO_DEBUG', '').lower() == 'true':
-    # See Fernet.generate_key():
-    return 'ZdT5H2hhrJY9sNdpzdXiGeRd7JMPprR4yrzp4nLzUVo='
+    return key
   return None
 
 
 def _cookie_fernet():
-  key = os.environ.get('FERNET_COOKIE_KEY', _default_debug_encryption_key())
+  key = os.environ.get(
+      'FERNET_COOKIE_KEY',
+      _default_debug_encryption_key(_DEBUG_COOKIE_ENCRYPTION_KEY))
   assert key is not None, 'No value set for environment variable FERNET_COOKIE_KEY; see .env file'
   assert len(key) > 40, 'Bad value of env var FERNET_COOKIE_KEY; use Fernet.generate_key() and heroku config:set'
   return Fernet(key.encode('ascii'))
 
 
 def _protobuf_fernet():
-  key = os.environ.get('FERNET_PROTOBUF_KEY', _default_debug_encryption_key())
+  key = os.environ.get(
+      'FERNET_PROTOBUF_KEY',
+      _default_debug_encryption_key(_DEBUG_PROTOBUF_ENCRYPTION_KEY))
   assert key is not None, 'No value set for environment variable FERNET_PROTOBUF_KEY; see .env file'
   assert len(key) > 40, 'Bad value of env var FERNET_PROTOBUF_KEY; use Fernet.generate_key() and heroku config:set'
   return Fernet(key.encode('ascii'))

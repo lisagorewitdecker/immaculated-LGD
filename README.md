@@ -98,7 +98,7 @@ tested because it's used in production (on Heroku).
    `immaculater` directory, run `heroku git:remote -a <yourprj>` and then run `git
    remote add` as directed.
  - Folow the steps below for 'Heroku Deployment'
- - Generate two encryption keys as follows:
+ - Generate two independent Fernet encryption keys:
 
 > $ heroku run python manage.py shell
 
@@ -106,19 +106,25 @@ tested because it's used in production (on Heroku).
 
 > > Fernet.generate_key()
 
-> 'cLlDneYkn69ZePyWcU9_mltFy4MwYf5pyqUnP-M8PxE='
-
 > > Fernet.generate_key()
 
-> 'mVb2CBYEwFi4sc8B7jpeDiIesuk6L7k1d_DI0sLC7PU='
+ - Generate a separate Django secret key:
 
-> > Fernet.generate_key()
+> $ heroku run python manage.py shell
 
-> 'Orjuw_obnZGQIR96CUgDVqmvW0V3Ea3yq4uJon-RLT8='
+> > from django.core.management.utils import get_random_secret_key
 
- - `heroku config:set FERNET_PROTOBUF_KEY=cLlDneYkn69ZePyWcU9_mltFy4MwYf5pyqUnP-M8PxE=`
- - `heroku config:set FERNET_COOKIE_KEY=mVb2CBYEwFi4sc8B7jpeDiIesuk6L7k1d_DI0sLC7PU=`
- - `heroku config:set DJANGO_SECRET_KEY=Orjuw_obnZGQIR96CUgDVqmvW0V3Ea3yq4uJon-RLT8=`
+> > get_random_secret_key()
+
+ - Set each generated value privately; never reuse or commit them:
+   - `heroku config:set FERNET_PROTOBUF_KEY='<first-generated-fernet-key>'`
+   - `heroku config:set FERNET_COOKIE_KEY='<second-generated-fernet-key>'`
+   - `heroku config:set DJANGO_SECRET_KEY='<generated-django-secret-key>'`
+   - `heroku config:set DJANGO_ALLOWED_HOSTS='<yourprj>.herokuapp.com'`
+ - If an existing deployment used keys published in older versions of this guide,
+   treat them as compromised. Re-encrypt stored data before replacing its
+   `FERNET_PROTOBUF_KEY`; changing that key without re-encrypting makes existing
+   encrypted to-do lists unreadable.
  - `heroku run python manage.py createsuperuser`
  - Log into https://<yourprj>.herokuapp.com/
  - Go to https://<yourprj>.herokuapp.com/admin to create additional user

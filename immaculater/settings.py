@@ -16,6 +16,7 @@ import sentry_sdk
 
 from sentry_sdk.integrations.django import DjangoIntegration
 
+from django.core.management.utils import get_random_secret_key
 from django.urls import reverse_lazy
 
 from immaculater import jwt
@@ -31,8 +32,7 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # Create a line DJANGO_SECRET_KEY=mysecretkey in your ../.env file for 'heroku local web' to see this. Use 'heroku config:set DJANGO_SECRET_KEY=secretkey' to affect it in production.
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY',
-                            "9!41(_jh5evq2br6^&w6rx+-8g((c-a!p%1s9uk_usu8nq&&a7")
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') or get_random_secret_key()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Using 'heroku local web'? Create a file ../.env with a line 'DJANGO_DEBUG="True"'.
@@ -176,8 +176,12 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = True
 X_FRAME_OPTIONS = "DENY"
 
-# Allow all host headers
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get(
+        'DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,[::1]').split(',')
+    if host.strip()
+]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
