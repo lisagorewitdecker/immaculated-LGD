@@ -36,6 +36,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import views
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
@@ -522,8 +523,8 @@ def _deserialized_cookie_value(cookie_raw_value):
   x = None
   try:
     x = base64.urlsafe_b64decode(cookie_raw_value)
-  except TypeError:
-    _debug_log('bad cookie raw value %s' % cookie_raw_value)
+  except (TypeError, ValueError, binascii.Error):
+    _debug_log('bad cookie raw value')
     return None
   try:
     return _cookie_fernet().decrypt(x)
@@ -583,7 +584,7 @@ def _cookie_value(request):
     value = request.COOKIES[_COOKIE_NAME]
     blob = _deserialized_cookie_value(value)
     if blob is None:
-      _debug_log('insane cookie value %s' % value)
+      _debug_log('insane cookie value')
       return _default_cookie_value(request.user.username)
     try:
       cookie_value = pyatdl_pb2.VisitorInfo0.FromString(blob)
@@ -603,8 +604,10 @@ def _set_cookie(response, key, value, days_expire=365):
   expires = datetime.datetime.strftime(
     datetime.datetime.utcnow() + datetime.timedelta(seconds=max_age),
     "%a, %d-%b-%Y %H:%M:%S GMT")
-  # Insecure, please:
-  response.set_cookie(key, value, max_age=max_age, expires=expires)
+  # Allow insecure cookies only in DEBUG for local development.
+  response.set_cookie(
+      key, value, max_age=max_age, expires=expires,
+      secure=not settings.DEBUG, httponly=True, samesite='Lax')
 
 
 # Tests our Sentry integration and tests that we are not showing stack traces
@@ -1381,10 +1384,8 @@ def _active_authenticated_user_via_jwt(request):
   users = User.objects.filter(pk=user_id)
   assert len(users) in (0, 1)
   if not users:
-    assert not 'TODO(chandler37): here 100'
     raise PermissionDenied()
   if not users[0].is_active:
-    assert not 'TODO(chandler37): here 200'
     raise PermissionDenied()
   return users[0]
 
