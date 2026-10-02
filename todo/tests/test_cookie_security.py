@@ -28,8 +28,18 @@ class CookieSecurityTest(TestCase):
 
     self.assertFalse(response.cookies['VISITOR_INFO0']['secure'])
 
-  def test_malformed_cookie_is_ignored(self):
-    self.assertIsNone(views._deserialized_cookie_value('abcde'))
+  def test_malformed_cookie_is_ignored_without_logging_input(self):
+    raw_value = 'abcde'
+    request = mock.Mock()
+    request.COOKIES = {views._COOKIE_NAME: raw_value}
+    request.user.username = 'user'
+
+    with mock.patch.object(views, '_debug_log') as debug_log:
+      views._cookie_value(request)
+
+    self.assertEqual(
+        debug_log.call_args_list,
+        [mock.call('bad cookie raw value'), mock.call('insane cookie value')])
 
   def test_jwt_for_missing_user_is_denied(self):
     self._assert_jwt_user_is_denied([])
