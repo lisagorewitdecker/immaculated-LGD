@@ -9,6 +9,15 @@ from todo import views
 
 
 class CookieSecurityTest(TestCase):
+  @override_settings(
+      DEBUG=False,
+      SECURE_HSTS_INCLUDE_SUBDOMAINS=False,
+      SECURE_HSTS_PRELOAD=False)
+  def test_secure_responses_include_hsts(self):
+    response = self.client.get('/todo/privacy.html', secure=True)
+
+    self.assertEqual(response['Strict-Transport-Security'], 'max-age=31536000')
+
   @override_settings(DEBUG=False)
   def test_preference_cookie_has_security_attributes(self):
     response = HttpResponse()

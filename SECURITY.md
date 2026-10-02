@@ -2,9 +2,6 @@
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
-
 | Version | Supported          |
 | ------- | ------------------ |
 | 5.1.x   | :white_check_mark: |
@@ -14,8 +11,9 @@ currently being supported with security updates.
 
 ## Reporting a Vulnerability
 
-Use this section to tell people how to report a vulnerability.
+Please report security vulnerabilities privately through
+[GitHub's security advisory reporting page](https://github.com/lisagorewitdecker/immaculated-LGD/security/advisories/new).
+Do not report undisclosed vulnerabilities in public issues.
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+The maintainers will acknowledge reports and follow up with an assessment and,
+if accepted, information about remediation and a security update.
