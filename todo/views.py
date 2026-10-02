@@ -533,7 +533,6 @@ def _deserialized_cookie_value(cookie_raw_value):
 
 
 _DEBUG_COOKIE_ENCRYPTION_KEY = Fernet.generate_key().decode('ascii')
-_DEBUG_PROTOBUF_ENCRYPTION_KEY = Fernet.generate_key().decode('ascii')
 
 
 def _default_debug_encryption_key(key):
@@ -553,8 +552,7 @@ def _cookie_fernet():
 
 def _protobuf_fernet():
   key = os.environ.get(
-      'FERNET_PROTOBUF_KEY',
-      _default_debug_encryption_key(_DEBUG_PROTOBUF_ENCRYPTION_KEY))
+      'FERNET_PROTOBUF_KEY')
   assert key is not None, 'No value set for environment variable FERNET_PROTOBUF_KEY; see .env file'
   assert len(key) > 40, 'Bad value of env var FERNET_PROTOBUF_KEY; use Fernet.generate_key() and heroku config:set'
   return Fernet(key.encode('ascii'))

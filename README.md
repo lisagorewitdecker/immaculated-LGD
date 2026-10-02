@@ -90,6 +90,12 @@ tested because it's used in production (on Heroku).
  - `make localmigrate`
  - `make localsuperuser`
  - `sqlite3 db.sqlite3` helps you see the local database if you need to.
+ - Generate a Fernet key with:
+   `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode('ascii'))"`
+   Add it as `FERNET_PROTOBUF_KEY='<key>'` to your private local `.env` file.
+   Keep this key stable to preserve access to locally stored to-do lists, and
+   never commit or share it. `heroku local web` loads `.env`; for `make local`
+   or a direct Django run, export `FERNET_PROTOBUF_KEY` in your shell.
 
 ## One-Time Heroku Setup
 
