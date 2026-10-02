@@ -604,7 +604,7 @@ def _set_cookie(response, key, value, days_expire=365):
   expires = datetime.datetime.strftime(
     datetime.datetime.utcnow() + datetime.timedelta(seconds=max_age),
     "%a, %d-%b-%Y %H:%M:%S GMT")
-  # Insecure, please:
+  # Allow insecure cookies only in DEBUG for local development.
   response.set_cookie(
       key, value, max_age=max_age, expires=expires,
       secure=not settings.DEBUG, httponly=True, samesite='Lax')
