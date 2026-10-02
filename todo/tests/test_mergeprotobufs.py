@@ -2,8 +2,10 @@
 from __future__ import unicode_literals
 
 import base64
+import os
 import random
 import time
+from unittest import mock
 
 import pytest
 
@@ -15,6 +17,9 @@ from pyatdllib.core import pyatdl_pb2
 from pyatdllib.ui import serialization
 from todo import models
 from todo import views
+
+os.environ.setdefault(
+    'FERNET_PROTOBUF_KEY', views.Fernet.generate_key().decode('ascii'))
 
 # TODO(chandler37): test admin_client, client, invalid password, unknown user, ...
 
@@ -40,6 +45,12 @@ class Mergeprotobufs(TestCase):
 
     def tearDown(self):
         time.time = self._saved_time
+
+    def test_protobuf_fernet_requires_configured_key(self):
+        with mock.patch.dict(os.environ):
+            os.environ.pop('FERNET_PROTOBUF_KEY', None)
+            with pytest.raises(AssertionError, match='FERNET_PROTOBUF_KEY'):
+                views._protobuf_fernet()
 
     def _populate_todolist(self):
         self.tdl_model = models.ToDoList(user=self.user,
