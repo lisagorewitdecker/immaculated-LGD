@@ -11,7 +11,6 @@ from todo import views
 class CookieSecurityTest(TestCase):
   @override_settings(
       DEBUG=False,
-      SECURE_HSTS_SECONDS=31536000,
       SECURE_HSTS_INCLUDE_SUBDOMAINS=False,
       SECURE_HSTS_PRELOAD=False)
   def test_secure_responses_include_hsts(self):
